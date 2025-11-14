@@ -1,0 +1,571 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>验证码识别测试页面</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        h1 {
+            text-align: center;
+            color: white;
+            margin-bottom: 30px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+        
+        .test-section {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+        
+        .test-section h2 {
+            color: #333;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #667eea;
+        }
+        
+        .captcha-container {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            margin: 15px 0;
+            padding: 15px;
+            background: #f5f5f5;
+            border-radius: 5px;
+        }
+        
+        .captcha-box {
+            border: 2px solid #ddd;
+            padding: 5px;
+            background: white;
+            border-radius: 5px;
+            display: inline-block;
+        }
+        
+        input[type="text"] {
+            padding: 8px 12px;
+            border: 2px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+            width: 150px;
+        }
+        
+        button {
+            padding: 8px 20px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background 0.3s;
+        }
+        
+        button:hover {
+            background: #5a67d8;
+        }
+        
+        .refresh-btn {
+            background: #48bb78;
+        }
+        
+        .refresh-btn:hover {
+            background: #38a169;
+        }
+        
+        .info {
+            color: #666;
+            font-size: 14px;
+            margin-left: 10px;
+        }
+        
+        #svgCaptcha {
+            background: white;
+            border: 2px solid #ddd;
+            padding: 10px;
+            border-radius: 5px;
+        }
+        
+        .base64-img {
+            border: 2px solid #ddd;
+            padding: 5px;
+            background: white;
+            border-radius: 5px;
+        }
+        
+        .mixed-captcha {
+            position: relative;
+            width: 200px;
+            height: 60px;
+            background: white;
+            border: 2px solid #ddd;
+            border-radius: 5px;
+        }
+        
+        .mixed-captcha canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+        }
+        
+        .drag-captcha {
+            width: 300px;
+            height: 150px;
+            position: relative;
+            background: #f0f0f0;
+            border: 2px solid #ddd;
+            border-radius: 5px;
+            overflow: hidden;
+        }
+        
+        .drag-slider {
+            width: 100%;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔐 验证码识别测试页面</h1>
+        
+        <!-- Canvas 验证码 -->
+        <div class="test-section">
+            <h2>1. Canvas 验证码</h2>
+            <div class="captcha-container">
+                <div class="captcha-box">
+                    <canvas id="canvasCaptcha" width="150" height="50"></canvas>
+                </div>
+                <input type="text" id="canvasInput" placeholder="输入验证码">
+                <button onclick="refreshCanvas()">🔄 刷新</button>
+                <button onclick="validateCanvas()">验证</button>
+                <span class="info">当前验证码: <span id="canvasCode"></span></span>
+            </div>
+        </div>
+        
+        <!-- IMG 标签验证码 -->
+        <div class="test-section">
+            <h2>2. IMG 标签验证码</h2>
+            <div class="captcha-container">
+                <div class="captcha-box">
+                    <img id="imgCaptcha" width="150" height="50" alt="验证码">
+                </div>
+                <input type="text" id="imgInput" placeholder="输入验证码">
+                <button onclick="refreshImg()">🔄 刷新</button>
+                <button onclick="validateImg()">验证</button>
+                <span class="info">当前验证码: <span id="imgCode"></span></span>
+            </div>
+        </div>
+        
+        <!-- Base64 图片验证码 -->
+        <div class="test-section">
+            <h2>3. Base64 编码图片验证码</h2>
+            <div class="captcha-container">
+                <div class="captcha-box">
+                    <img id="base64Captcha" class="base64-img" width="150" height="50" alt="Base64验证码">
+                </div>
+                <input type="text" id="base64Input" placeholder="输入验证码">
+                <button onclick="refreshBase64()">🔄 刷新</button>
+                <button onclick="validateBase64()">验证</button>
+                <span class="info">当前验证码: <span id="base64Code"></span></span>
+            </div>
+        </div>
+        
+        <!-- SVG 验证码 -->
+        <div class="test-section">
+            <h2>4. SVG 验证码</h2>
+            <div class="captcha-container">
+                <div id="svgCaptcha"></div>
+                <input type="text" id="svgInput" placeholder="输入验证码">
+                <button onclick="refreshSVG()">🔄 刷新</button>
+                <button onclick="validateSVG()">验证</button>
+                <span class="info">当前验证码: <span id="svgCode"></span></span>
+            </div>
+        </div>
+        
+        <!-- 混合Canvas背景的验证码 -->
+        <div class="test-section">
+            <h2>5. 带噪点干扰的Canvas验证码</h2>
+            <div class="captcha-container">
+                <div class="captcha-box">
+                    <canvas id="noisyCaptcha" width="200" height="60"></canvas>
+                </div>
+                <input type="text" id="noisyInput" placeholder="输入验证码">
+                <button onclick="refreshNoisy()">🔄 刷新</button>
+                <button onclick="validateNoisy()">验证</button>
+                <span class="info">当前验证码: <span id="noisyCode"></span></span>
+            </div>
+        </div>
+        
+        <!-- 数学公式验证码 -->
+        <div class="test-section">
+            <h2>6. 数学公式验证码</h2>
+            <div class="captcha-container">
+                <div class="captcha-box">
+                    <canvas id="mathCaptcha" width="150" height="50"></canvas>
+                </div>
+                <input type="text" id="mathInput" placeholder="输入计算结果">
+                <button onclick="refreshMath()">🔄 刷新</button>
+                <button onclick="validateMath()">验证</button>
+                <span class="info">正确答案: <span id="mathAnswer"></span></span>
+            </div>
+        </div>
+        
+        <!-- 动态CSS背景验证码 -->
+        <div class="test-section">
+            <h2>7. CSS背景图验证码</h2>
+            <div class="captcha-container">
+                <div class="captcha-box">
+                    <div id="cssCaptcha" style="width: 150px; height: 50px; background-size: cover;"></div>
+                </div>
+                <input type="text" id="cssInput" placeholder="输入验证码">
+                <button onclick="refreshCSS()">🔄 刷新</button>
+                <button onclick="validateCSS()">验证</button>
+                <span class="info">当前验证码: <span id="cssCode"></span></span>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // 生成随机字符串
+        function generateRandomString(length) {
+            const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+            let result = '';
+            for (let i = 0; i < length; i++) {
+                result += chars.charAt(Math.floor(Math.random() * chars.length));
+            }
+            return result;
+        }
+        
+        // 生成随机颜色
+        function randomColor() {
+            return '#' + Math.floor(Math.random()*16777215).toString(16);
+        }
+        
+        // 1. Canvas验证码
+        let canvasCode = '';
+        function drawCanvasCaptcha() {
+            const canvas = document.getElementById('canvasCaptcha');
+            const ctx = canvas.getContext('2d');
+            canvasCode = generateRandomString(4);
+            
+            // 清空画布
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            // 背景
+            ctx.fillStyle = '#f0f0f0';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            // 文字
+            ctx.font = 'bold 30px Arial';
+            ctx.fillStyle = '#333';
+            ctx.textBaseline = 'middle';
+            ctx.fillText(canvasCode, 30, 25);
+            
+            // 干扰线
+            for(let i = 0; i < 3; i++) {
+                ctx.strokeStyle = randomColor();
+                ctx.beginPath();
+                ctx.moveTo(Math.random() * 150, Math.random() * 50);
+                ctx.lineTo(Math.random() * 150, Math.random() * 50);
+                ctx.stroke();
+            }
+            
+            document.getElementById('canvasCode').textContent = canvasCode;
+        }
+        
+        function refreshCanvas() {
+            drawCanvasCaptcha();
+        }
+        
+        function validateCanvas() {
+            const input = document.getElementById('canvasInput').value;
+            if (input.toUpperCase() === canvasCode) {
+                alert('✅ Canvas验证码正确！');
+            } else {
+                alert('❌ Canvas验证码错误！');
+            }
+        }
+        
+        // 2. IMG验证码（使用Canvas生成后转为dataURL）
+        let imgCode = '';
+        function generateImgCaptcha() {
+            const canvas = document.createElement('canvas');
+            canvas.width = 150;
+            canvas.height = 50;
+            const ctx = canvas.getContext('2d');
+            
+            imgCode = generateRandomString(5);
+            
+            ctx.fillStyle = '#e0e0e0';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            ctx.font = 'italic 25px Georgia';
+            ctx.fillStyle = '#4a4a4a';
+            ctx.fillText(imgCode, 25, 30);
+            
+            // 添加噪点
+            for(let i = 0; i < 50; i++) {
+                ctx.fillStyle = randomColor();
+                ctx.fillRect(Math.random() * 150, Math.random() * 50, 2, 2);
+            }
+            
+            document.getElementById('imgCaptcha').src = canvas.toDataURL();
+            document.getElementById('imgCode').textContent = imgCode;
+        }
+        
+        function refreshImg() {
+            generateImgCaptcha();
+        }
+        
+        function validateImg() {
+            const input = document.getElementById('imgInput').value;
+            if (input.toUpperCase() === imgCode) {
+                alert('✅ IMG验证码正确！');
+            } else {
+                alert('❌ IMG验证码错误！');
+            }
+        }
+        
+        // 3. Base64验证码
+        let base64Code = '';
+        function generateBase64Captcha() {
+            const canvas = document.createElement('canvas');
+            canvas.width = 150;
+            canvas.height = 50;
+            const ctx = canvas.getContext('2d');
+            
+            base64Code = generateRandomString(6);
+            
+            // 渐变背景
+            const gradient = ctx.createLinearGradient(0, 0, 150, 50);
+            gradient.addColorStop(0, '#ffd89b');
+            gradient.addColorStop(1, '#19547b');
+            ctx.fillStyle = gradient;
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            ctx.font = 'bold 24px Courier';
+            ctx.fillStyle = 'white';
+            ctx.fillText(base64Code, 20, 30);
+            
+            const dataURL = canvas.toDataURL('image/png');
+            document.getElementById('base64Captcha').src = dataURL;
+            document.getElementById('base64Code').textContent = base64Code;
+        }
+        
+        function refreshBase64() {
+            generateBase64Captcha();
+        }
+        
+        function validateBase64() {
+            const input = document.getElementById('base64Input').value;
+            if (input.toUpperCase() === base64Code) {
+                alert('✅ Base64验证码正确！');
+            } else {
+                alert('❌ Base64验证码错误！');
+            }
+        }
+        
+        // 4. SVG验证码
+        let svgCode = '';
+        function generateSVGCaptcha() {
+            svgCode = generateRandomString(4);
+            const svg = `
+                <svg width="150" height="50" xmlns="http://www.w3.org/2000/svg">
+                    <rect width="150" height="50" fill="#f9f9f9"/>
+                    <text x="20" y="35" font-family="Arial" font-size="28" fill="${randomColor()}" transform="rotate(-5 75 25)">${svgCode}</text>
+                    <line x1="0" y1="${Math.random() * 50}" x2="150" y2="${Math.random() * 50}" stroke="${randomColor()}" stroke-width="1"/>
+                </svg>
+            `;
+            document.getElementById('svgCaptcha').innerHTML = svg;
+            document.getElementById('svgCode').textContent = svgCode;
+        }
+        
+        function refreshSVG() {
+            generateSVGCaptcha();
+        }
+        
+        function validateSVG() {
+            const input = document.getElementById('svgInput').value;
+            if (input.toUpperCase() === svgCode) {
+                alert('✅ SVG验证码正确！');
+            } else {
+                alert('❌ SVG验证码错误！');
+            }
+        }
+        
+        // 5. 带噪点的Canvas验证码
+        let noisyCode = '';
+        function generateNoisyCaptcha() {
+            const canvas = document.getElementById('noisyCaptcha');
+            const ctx = canvas.getContext('2d');
+            noisyCode = generateRandomString(5);
+            
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            // 背景噪点
+            for(let i = 0; i < 200; i++) {
+                ctx.fillStyle = `rgba(${Math.random()*255},${Math.random()*255},${Math.random()*255},0.3)`;
+                ctx.fillRect(Math.random() * 200, Math.random() * 60, 3, 3);
+            }
+            
+            // 扭曲文字
+            ctx.font = 'bold 32px Arial';
+            for(let i = 0; i < noisyCode.length; i++) {
+                ctx.save();
+                ctx.translate(30 + i * 30, 30);
+                ctx.rotate((Math.random() - 0.5) * 0.4);
+                ctx.fillStyle = randomColor();
+                ctx.fillText(noisyCode[i], 0, 0);
+                ctx.restore();
+            }
+            
+            // 干扰线
+            for(let i = 0; i < 5; i++) {
+                ctx.strokeStyle = `rgba(${Math.random()*255},${Math.random()*255},${Math.random()*255},0.5)`;
+                ctx.lineWidth = Math.random() * 2;
+                ctx.beginPath();
+                ctx.moveTo(Math.random() * 200, Math.random() * 60);
+                ctx.quadraticCurveTo(100, Math.random() * 60, Math.random() * 200, Math.random() * 60);
+                ctx.stroke();
+            }
+            
+            document.getElementById('noisyCode').textContent = noisyCode;
+        }
+        
+        function refreshNoisy() {
+            generateNoisyCaptcha();
+        }
+        
+        function validateNoisy() {
+            const input = document.getElementById('noisyInput').value;
+            if (input.toUpperCase() === noisyCode) {
+                alert('✅ 噪点验证码正确！');
+            } else {
+                alert('❌ 噪点验证码错误！');
+            }
+        }
+        
+        // 6. 数学公式验证码
+        let mathAnswer = 0;
+        function generateMathCaptcha() {
+            const canvas = document.getElementById('mathCaptcha');
+            const ctx = canvas.getContext('2d');
+            
+            const num1 = Math.floor(Math.random() * 10) + 1;
+            const num2 = Math.floor(Math.random() * 10) + 1;
+            const operators = ['+', '-', '×'];
+            const operator = operators[Math.floor(Math.random() * operators.length)];
+            
+            switch(operator) {
+                case '+':
+                    mathAnswer = num1 + num2;
+                    break;
+                case '-':
+                    mathAnswer = num1 - num2;
+                    break;
+                case '×':
+                    mathAnswer = num1 * num2;
+                    break;
+            }
+            
+            const mathText = `${num1} ${operator} ${num2} = ?`;
+            
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.fillStyle = '#fff3e0';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            ctx.font = '20px Arial';
+            ctx.fillStyle = '#333';
+            ctx.fillText(mathText, 20, 30);
+            
+            document.getElementById('mathAnswer').textContent = mathAnswer;
+        }
+        
+        function refreshMath() {
+            generateMathCaptcha();
+        }
+        
+        function validateMath() {
+            const input = document.getElementById('mathInput').value;
+            if (parseInt(input) === mathAnswer) {
+                alert('✅ 数学验证码正确！');
+            } else {
+                alert('❌ 数学验证码错误！');
+            }
+        }
+        
+        // 7. CSS背景验证码
+        let cssCode = '';
+        function generateCSSCaptcha() {
+            const canvas = document.createElement('canvas');
+            canvas.width = 150;
+            canvas.height = 50;
+            const ctx = canvas.getContext('2d');
+            
+            cssCode = generateRandomString(4);
+            
+            // 彩色背景
+            const gradient = ctx.createRadialGradient(75, 25, 5, 75, 25, 100);
+            gradient.addColorStop(0, '#ff6b6b');
+            gradient.addColorStop(1, '#4ecdc4');
+            ctx.fillStyle = gradient;
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            ctx.font = 'bold 28px Verdana';
+            ctx.fillStyle = 'white';
+            ctx.strokeStyle = 'black';
+            ctx.lineWidth = 2;
+            ctx.strokeText(cssCode, 30, 32);
+            ctx.fillText(cssCode, 30, 32);
+            
+            const dataURL = canvas.toDataURL();
+            document.getElementById('cssCaptcha').style.backgroundImage = `url(${dataURL})`;
+            document.getElementById('cssCode').textContent = cssCode;
+        }
+        
+        function refreshCSS() {
+            generateCSSCaptcha();
+        }
+        
+        function validateCSS() {
+            const input = document.getElementById('cssInput').value;
+            if (input.toUpperCase() === cssCode) {
+                alert('✅ CSS验证码正确！');
+            } else {
+                alert('❌ CSS验证码错误！');
+            }
+        }
+        
+        // 页面加载时初始化所有验证码
+        window.onload = function() {
+            drawCanvasCaptcha();
+            generateImgCaptcha();
+            generateBase64Captcha();
+            generateSVGCaptcha();
+            generateNoisyCaptcha();
+            generateMathCaptcha();
+            generateCSSCaptcha();
+        };
+    </script>
+</body>
+</html>

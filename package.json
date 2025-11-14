@@ -1,0 +1,20 @@
+{
+  "name": "ddddocr-tampermonkey",
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite build --watch",
+    "build": "vite build",
+    "type-check": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "@types/tampermonkey": "^5.0.3",
+    "terser": "^5.44.0",
+    "typescript": "^5.3.3",
+    "vite": "^5.0.11",
+    "vite-plugin-monkey": "^7.1.4"
+  },
+  "dependencies": {
+    "onnxruntime-web": "^1.17.0"
+  }
+}
