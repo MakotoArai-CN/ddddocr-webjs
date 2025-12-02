@@ -87,7 +87,7 @@ export class DdddOCR {
     }
   }
 
-  // ★ 支持 HTMLImageElement
+  // 支持 HTMLImageElement
   async recognize(input: string | Blob | HTMLImageElement): Promise<OCRResult> {
     if (!this.initialized || !this.session) {
       await this.init();
@@ -101,7 +101,7 @@ export class DdddOCR {
 
       const startTime = Date.now();
       
-      // ★ 使用改进的 loadImage（支持 HTMLImageElement）
+      // 使用改进的 loadImage（支持 HTMLImageElement）
       const { data, width, height } = await ImageProcessor.loadImage(input);
       
       console.log(`   加载耗时: ${Date.now() - startTime}ms`);

@@ -2,7 +2,7 @@ import { defineConfig } from 'vite';
 import monkey from 'vite-plugin-monkey';
 import { CONSTANTS } from './src/config';
 
-const BUILD_DATE = new Date().toISOString();
+const BUILD_DATE = new Date().getTime();
 
 const extractDomains = (urls: string[]): string[] => {
   return urls.map(url => {
@@ -47,11 +47,12 @@ export default defineConfig({
     monkey({
       entry: 'src/main.ts',
       userscript: {
+        author: 'MakotoArai-CN',
         name: 'DDDD OCR WEB - 验证码自动识别',
         namespace: 'https://github.com/MakotoArai-CN/ddddocr-webjs',
-        version: `${CONSTANTS.MODEL_VERSION}-build${BUILD_DATE}`,
-        description: '自动检测并识别页面验证码，自动填充到输入框。首次使用需设置白名单，下载约50MB模型文件以及20MB左右的ONNX推理运行时文件，如果弹出窗口提示授权请授权给脚本。',
-        author: 'MakotoArai-CN',
+        version: `${CONSTANTS.MODEL_VERSION}-beta-build${BUILD_DATE}`,
+        description: '自动检测并识别页面验证码，自动填充到输入框。首次使用需设置白名单，会自动下载约50MB模型文件以及20MB左右的ONNX推理运行时文件，但是不推荐自动下载，可能很慢，建议手动下载并上传（详见项目文档）。如果弹出窗口提示授权请授权给脚本。',
+        license: 'MIT',
         match: ['*://*/*'],
         icon: 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><text y="0.9em" font-size="90">🔤</text></svg>',
         grant: [
